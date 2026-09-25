@@ -1,0 +1,68 @@
+import { SmartScene } from '../types';
+
+export const INITIAL_SMART_SCENES: SmartScene[] = [
+  {
+    id: 'scene-workout-inferno',
+    name: 'Inferno Workout Mode',
+    description: 'Ramps AC down to 66°F, dims room to high-energy Crimson, and sets fan to Level 3 Turbo with Auto-Cool armed.',
+    iconName: 'flame',
+    settings: {
+      fanSpeed: 3,
+      fanAutoCool: true,
+      ambientLight: 'crimson',
+      ambientBrightness: 90,
+      targetTemp: 66,
+    },
+    accentColor: '#ef4444',
+    badge: 'High Intensity',
+    voicePhrase: 'Alexa, set workout mode',
+  },
+  {
+    id: 'scene-yoga-mindful',
+    name: 'Zen Yoga & Warmth Mode',
+    description: 'Warms the living room to 74°F for deep muscle elasticity, shifts lights to calming Zen Violet, and turns fans silent.',
+    iconName: 'lotus',
+    settings: {
+      fanSpeed: 0,
+      fanAutoCool: false,
+      ambientLight: 'zen-violet',
+      ambientBrightness: 65,
+      targetTemp: 74,
+    },
+    accentColor: '#a855f7',
+    badge: 'Flexibility & Flow',
+    voicePhrase: 'Alexa, activate yoga mode',
+  },
+  {
+    id: 'scene-cardio-flow',
+    name: 'Cardio Focus Mode',
+    description: 'Crisp 68°F ambient temperature, steady convection airflow (Level 2), and Amber focus backlighting.',
+    iconName: 'dumbbell',
+    settings: {
+      fanSpeed: 2,
+      fanAutoCool: true,
+      ambientLight: 'amber',
+      ambientBrightness: 80,
+      targetTemp: 68,
+    },
+    accentColor: '#f59e0b',
+    badge: 'Aerobic Rhythm',
+    voicePhrase: 'Alexa, start cardio focus',
+  },
+  {
+    id: 'scene-post-recovery',
+    name: 'Post-Workout Cool Down',
+    description: 'Schedules gentle parasympathetic recovery: 71°F climate, silent low-breeze fan (Level 1), and gentle Daylight white.',
+    iconName: 'moon',
+    settings: {
+      fanSpeed: 1,
+      fanAutoCool: false,
+      ambientLight: 'cool-white',
+      ambientBrightness: 50,
+      targetTemp: 71,
+    },
+    accentColor: '#10b981',
+    badge: 'Parasympathetic Reset',
+    voicePhrase: 'Alexa, activate recovery mode',
+  },
+];

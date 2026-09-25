@@ -1,0 +1,6 @@
+{
+  "name": "AuraFit TV - Interactive Fire TV Fitness & Media Hub",
+  "description": "Next-gen interactive fitness and media platform for Amazon Fire TV with real-time biometric viewing widgets, smart living room controls, and AWS cloud architecture.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
