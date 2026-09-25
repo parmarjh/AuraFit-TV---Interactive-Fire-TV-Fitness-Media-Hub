@@ -17,6 +17,7 @@ import { INITIAL_VOICE_HISTORY } from './data/voiceHistory';
 import { INITIAL_HEART_RATE_HISTORY, generate15MinHeartRateHistory, getZoneFromBpm } from './data/heartRateData';
 import { SmartSceneController } from './components/smarthome/SmartSceneController';
 import { VoiceHistoryModal } from './components/voice/VoiceHistoryModal';
+import { ReadmeModal } from './components/docs/ReadmeModal';
 import { Workout, ScheduledWorkout, SmartHomeState, AutomationRule, AutomationLog, SmartScene, VoiceCommandRecord } from './types';
 import { playRemoteClick, playRemoteSelect } from './utils/soundEffects';
 import { Sparkles, Tv, CheckCircle, Info, Zap, Radio, Mic } from 'lucide-react';
@@ -26,6 +27,7 @@ export default function App() {
   const [showRemote, setShowRemote] = useState(true);
   const [showProposalModal, setShowProposalModal] = useState(false);
   const [showVoiceHistoryModal, setShowVoiceHistoryModal] = useState(false);
+  const [showReadmeModal, setShowReadmeModal] = useState(false);
   const [activeWorkout, setActiveWorkout] = useState<Workout | null>(null);
 
   // Focus index for remote navigation
@@ -401,6 +403,7 @@ export default function App() {
         onToggleRemote={() => setShowRemote(!showRemote)}
         onOpenProposal={() => setShowProposalModal(true)}
         onOpenVoiceHistory={() => setShowVoiceHistoryModal(true)}
+        onOpenReadme={() => setShowReadmeModal(true)}
       />
 
       {/* Main Content Area */}
@@ -573,6 +576,13 @@ export default function App() {
       <GrantPitchModal
         isOpen={showProposalModal}
         onClose={() => setShowProposalModal(false)}
+      />
+
+      {/* Interactive Documentation & README Modal */}
+      <ReadmeModal
+        isOpen={showReadmeModal}
+        onClose={() => setShowReadmeModal(false)}
+        onLaunchWorkout={() => setActiveWorkout(workouts[0])}
       />
     </div>
   );

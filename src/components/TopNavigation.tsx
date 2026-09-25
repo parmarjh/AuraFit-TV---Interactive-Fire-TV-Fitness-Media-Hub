@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tv, Cloud, FileText, Volume2, VolumeX, Zap, Mic } from 'lucide-react';
+import { Tv, Cloud, FileText, Volume2, VolumeX, Zap, Mic, BookOpen } from 'lucide-react';
 import { isSoundEnabled, toggleSound, playRemoteClick } from '../utils/soundEffects';
 
 interface TopNavigationProps {
@@ -9,6 +9,7 @@ interface TopNavigationProps {
   onToggleRemote: () => void;
   onOpenProposal: () => void;
   onOpenVoiceHistory?: () => void;
+  onOpenReadme?: () => void;
 }
 
 export const TopNavigation: React.FC<TopNavigationProps> = ({
@@ -18,6 +19,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
   onToggleRemote,
   onOpenProposal,
   onOpenVoiceHistory,
+  onOpenReadme,
 }) => {
   const [soundOn, setSoundOn] = React.useState(isSoundEnabled());
 
@@ -155,6 +157,20 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
           <Tv className="w-3.5 h-3.5" />
           <span>Fire TV Remote</span>
         </button>
+
+        {onOpenReadme && (
+          <button
+            onClick={() => {
+              playRemoteClick();
+              onOpenReadme();
+            }}
+            className="px-2.5 py-1.5 text-xs font-semibold rounded-md bg-neutral-800 hover:bg-neutral-700 text-neutral-200 transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
+            title="Open Documentation & README"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+            <span>README / Docs</span>
+          </button>
+        )}
 
         <button
           onClick={onOpenProposal}
