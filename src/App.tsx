@@ -9,6 +9,7 @@ import { TvAutomationHub } from './components/tv/TvAutomationHub';
 import { WorkoutPlayerModal } from './components/player/WorkoutPlayerModal';
 import { AwsArchitectureModal } from './components/aws/AwsArchitectureModal';
 import { GrantPitchModal } from './components/proposal/GrantPitchModal';
+import { ReadmeModal } from './components/docs/ReadmeModal';
 import { WORKOUT_CATALOG } from './data/workouts';
 import { INITIAL_SCHEDULE } from './data/schedule';
 import { INITIAL_AUTOMATION_RULES, INITIAL_AUTOMATION_LOGS } from './data/automations';
@@ -33,6 +34,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'workouts' | 'iptv' | 'smarthome' | 'automate' | 'schedule' | 'aws'>('dashboard');
   const [showRemote, setShowRemote] = useState(true);
   const [showProposalModal, setShowProposalModal] = useState(false);
+  const [showReadmeModal, setShowReadmeModal] = useState(false);
   const [showVoiceHistoryModal, setShowVoiceHistoryModal] = useState(false);
   const [activeWorkout, setActiveWorkout] = useState<Workout | null>(null);
   const [openIptvAddModal, setOpenIptvAddModal] = useState(false);
@@ -550,6 +552,7 @@ export default function App() {
         onToggleRemote={() => setShowRemote(!showRemote)}
         onOpenProposal={() => setShowProposalModal(true)}
         onOpenVoiceHistory={() => setShowVoiceHistoryModal(true)}
+        onOpenReadme={() => setShowReadmeModal(true)}
         voiceLang={voiceLanguage}
         onVoiceLangChange={(newLang) => handleVoiceLanguageChange(newLang, true)}
         onTuneZeeCinema={() => {
@@ -774,6 +777,16 @@ export default function App() {
       <GrantPitchModal
         isOpen={showProposalModal}
         onClose={() => setShowProposalModal(false)}
+      />
+
+      {/* Interactive Documentation & README Modal */}
+      <ReadmeModal
+        isOpen={showReadmeModal}
+        onClose={() => setShowReadmeModal(false)}
+        onLaunchWorkout={() => {
+          setShowReadmeModal(false);
+          setActiveWorkout(workouts[0]);
+        }}
       />
     </div>
   );

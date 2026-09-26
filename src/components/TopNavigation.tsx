@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tv, Cloud, FileText, Volume2, VolumeX, Zap, Mic, Radio, Languages } from 'lucide-react';
+import { Tv, Cloud, FileText, Volume2, VolumeX, Zap, Mic, Radio, Languages, BookOpen } from 'lucide-react';
 import { isSoundEnabled, toggleSound, playRemoteClick } from '../utils/soundEffects';
 import { VoiceLanguage } from '../types';
 
@@ -10,6 +10,7 @@ interface TopNavigationProps {
   onToggleRemote: () => void;
   onOpenProposal: () => void;
   onOpenVoiceHistory?: () => void;
+  onOpenReadme?: () => void;
   voiceLang?: VoiceLanguage;
   onVoiceLangChange?: (lang: VoiceLanguage) => void;
   onTuneZeeCinema?: () => void;
@@ -22,6 +23,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
   onToggleRemote,
   onOpenProposal,
   onOpenVoiceHistory,
+  onOpenReadme,
   voiceLang = 'en',
   onVoiceLangChange,
   onTuneZeeCinema,
@@ -204,6 +206,20 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
           >
             <Mic className="w-3.5 h-3.5 text-cyan-400" />
             <span>Voice History</span>
+          </button>
+        )}
+
+        {onOpenReadme && (
+          <button
+            onClick={() => {
+              playRemoteClick();
+              onOpenReadme();
+            }}
+            className="px-2.5 py-1.5 text-xs font-semibold rounded-md bg-neutral-800 hover:bg-neutral-700 text-neutral-200 transition-colors cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
+            title="Open Interactive Guide & Documentation"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden sm:inline">Guide & README</span>
           </button>
         )}
 

@@ -144,6 +144,17 @@ export function speakVoiceResponse(text: string, lang: VoiceLanguage = 'en'): vo
       }
     }
 
+    utterance.onerror = (e) => {
+      // Gracefully silence expected browser cancellations/interruptions
+      if (e.error !== 'canceled' && e.error !== 'interrupted') {
+        console.warn('Speech synthesis utterance error:', e.error);
+      }
+    };
+
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    }
+
     window.speechSynthesis.speak(utterance);
   } catch (err) {
     console.warn('Speech synthesis not permitted or unavailable:', err);
