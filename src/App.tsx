@@ -17,18 +17,27 @@ import { INITIAL_VOICE_HISTORY } from './data/voiceHistory';
 import { INITIAL_HEART_RATE_HISTORY, generate15MinHeartRateHistory, getZoneFromBpm } from './data/heartRateData';
 import { SmartSceneController } from './components/smarthome/SmartSceneController';
 import { VoiceHistoryModal } from './components/voice/VoiceHistoryModal';
-import { ReadmeModal } from './components/docs/ReadmeModal';
-import { Workout, ScheduledWorkout, SmartHomeState, AutomationRule, AutomationLog, SmartScene, VoiceCommandRecord } from './types';
+import { IptvChannelsHub } from './components/iptv/IptvChannelsHub';
+import { Workout, ScheduledWorkout, SmartHomeState, AutomationRule, AutomationLog, SmartScene, VoiceCommandRecord, IptvChannel, VoiceLanguage } from './types';
 import { playRemoteClick, playRemoteSelect } from './utils/soundEffects';
-import { Sparkles, Tv, CheckCircle, Info, Zap, Radio, Mic } from 'lucide-react';
+import { Sparkles, Tv, CheckCircle, Info, Zap, Radio, Mic, Languages } from 'lucide-react';
+import {
+  VOICE_LANGUAGES,
+  getStoredVoiceLanguage,
+  setStoredVoiceLanguage,
+  speakVoiceResponse,
+  tryVoiceSample,
+} from './utils/voiceAssistant';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'workouts' | 'smarthome' | 'automate' | 'schedule' | 'aws'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'workouts' | 'iptv' | 'smarthome' | 'automate' | 'schedule' | 'aws'>('dashboard');
   const [showRemote, setShowRemote] = useState(true);
   const [showProposalModal, setShowProposalModal] = useState(false);
   const [showVoiceHistoryModal, setShowVoiceHistoryModal] = useState(false);
-  const [showReadmeModal, setShowReadmeModal] = useState(false);
   const [activeWorkout, setActiveWorkout] = useState<Workout | null>(null);
+  const [openIptvAddModal, setOpenIptvAddModal] = useState(false);
+  const [voiceLanguage, setVoiceLanguage] = useState<VoiceLanguage>(() => getStoredVoiceLanguage());
+  const [selectedIptvChannelId, setSelectedIptvChannelId] = useState<string>('chan-zee-cinema-hd');
 
   // Focus index for remote navigation
   const [focusedCardIndex, setFocusedCardIndex] = useState(0);
@@ -261,13 +270,75 @@ export default function App() {
     }
   };
 
+  const handleVoiceLanguageChange = (newLang: VoiceLanguage, triggerAudioPreview = true) => {
+    setVoiceLanguage(newLang);
+    setStoredVoiceLanguage(newLang);
+    if (triggerAudioPreview) {
+      const sample = tryVoiceSample(newLang);
+      const title = newLang === 'gu' ? 'ગુજરાતી (Gujarati)' : newLang === 'hi' ? 'हिन्दी (Hindi)' : 'English';
+      showToast(`Voice set to ${title}: "${sample.phrase.slice(0, 36)}..."`, 'success');
+    }
+  };
+
   // Voice Command / Alexa processor
   const handleVoiceCommand = (rawText: string) => {
     const text = rawText.toLowerCase();
     let resultingAction = '';
     let category: VoiceCommandRecord['category'] = 'other';
 
-    if (text.includes('history') || text.includes('transcription') || text.includes('voice command') || text.includes('voice log')) {
+    // 1. Zee Cinema HD Live (Gujarati, Hindi, English)
+    if (
+      text.includes('zee cinema') ||
+      text.includes('zeecinema') ||
+      text.includes('zee5') ||
+      text.includes('zee 5') ||
+      text.includes('ज़ी सिनेमा') ||
+      text.includes('ઝી સિનેમા') ||
+      text.includes('સિનેમા') ||
+      text.includes('cinema hd') ||
+      text.includes('bollywood')
+    ) {
+      setActiveTab('iptv');
+      setSelectedIptvChannelId('chan-zee-cinema-hd');
+      resultingAction = 'Tuned to Zee Cinema HD live Bollywood stream with official ZEE5 Live link (Gujarati, Hindi, English audio tracks)';
+      category = 'device';
+      const reply =
+        voiceLanguage === 'gu'
+          ? 'ઝી સિનેમા એચડી ચાલુ કરી રહ્યા છીએ. ગુજરાતી, હિન્દી અને અંગ્રેજી અવાજ ઉપલબ્ધ છે.'
+          : voiceLanguage === 'hi'
+          ? 'ज़ी सिनेमा एचडी शुरू किया जा रहा है। हिन्दी, गुजराती और अंग्रेजी आवाज उपलब्ध है।'
+          : 'Tuning to Zee Cinema HD live on ZEE5. Gujarati, Hindi, and English audio tracks ready.';
+      speakVoiceResponse(reply, voiceLanguage);
+      showToast(`Alexa: "${reply}"`, 'success');
+    }
+    // 2. Multilingual Voice Language Switching (Gujarati, Hindi, English)
+    else if (
+      text.includes('gujarati') ||
+      text.includes('ગુજરાતી') ||
+      text.includes('gujrati') ||
+      text.includes('ગુજ') ||
+      (text.includes('voice') && text.includes('gu'))
+    ) {
+      handleVoiceLanguageChange('gu', true);
+      resultingAction = 'Switched Alexa Voice Recognition and Assistant Language to Gujarati (ગુજરાતી)';
+      category = 'device';
+    } else if (
+      text.includes('hindi') ||
+      text.includes('हिन्दी') ||
+      text.includes('हिंदी') ||
+      (text.includes('voice') && text.includes('hi'))
+    ) {
+      handleVoiceLanguageChange('hi', true);
+      resultingAction = 'Switched Alexa Voice Recognition and Assistant Language to Hindi (हिन्दी)';
+      category = 'device';
+    } else if (
+      (text.includes('voice') || text.includes('language') || text.includes('speak') || text.includes('bol')) &&
+      (text.includes('english') || text.includes('અંગ્રેજી') || text.includes('अंग्रेजी') || text.includes('en'))
+    ) {
+      handleVoiceLanguageChange('en', true);
+      resultingAction = 'Switched Alexa Voice Recognition and Assistant Language to English';
+      category = 'device';
+    } else if (text.includes('history') || text.includes('transcription') || text.includes('voice command') || text.includes('voice log')) {
       setShowVoiceHistoryModal(true);
       resultingAction = 'Opened Alexa Voice Command History modal displaying the last 10 transcribed commands';
       category = 'navigation';
@@ -345,6 +416,82 @@ export default function App() {
       resultingAction = `Queried Apple Watch BLE telemetry: returned ${smartHomeState.currentBpm} BPM (${smartHomeState.targetZone} zone)`;
       category = 'advisor';
       showToast(`Alexa: "Current heart rate is ${smartHomeState.currentBpm} BPM (${smartHomeState.targetZone} zone)"`, 'info');
+    } else if (text.includes('fat burn') || text.includes('zone 2')) {
+      setSmartHomeState((prev) => ({
+        ...prev,
+        currentBpm: 125,
+        targetZone: 'Fat Burn',
+        heartRateHistory: generate15MinHeartRateHistory(125),
+      }));
+      resultingAction = 'Tuned heart rate target to Zone 2: Fat Burn (125 BPM, 60-70% Max HR)';
+      category = 'device';
+      showToast('Alexa: "Adjusted target to Fat Burn Zone (125 BPM)"', 'success');
+    } else if (text.includes('peak zone') || text.includes('zone 4') || text.includes('anaerobic zone')) {
+      setSmartHomeState((prev) => ({
+        ...prev,
+        currentBpm: 168,
+        targetZone: 'Peak',
+        heartRateHistory: generate15MinHeartRateHistory(168),
+      }));
+      resultingAction = 'Tuned heart rate target to Zone 4: Peak (168 BPM, 80-100% Max HR)';
+      category = 'device';
+      showToast('Alexa: "Shifted target to Peak Intensity Zone (168 BPM)"', 'success');
+    } else if (text.includes('warm-up zone') || text.includes('warmup zone') || text.includes('zone 1')) {
+      setSmartHomeState((prev) => ({
+        ...prev,
+        currentBpm: 105,
+        targetZone: 'Warm-up',
+        heartRateHistory: generate15MinHeartRateHistory(105),
+      }));
+      resultingAction = 'Tuned heart rate target to Zone 1: Warm-up (105 BPM, 50-60% Max HR)';
+      category = 'device';
+      showToast('Alexa: "Shifted target to Warm-up Zone (105 BPM)"', 'success');
+    } else if (text.includes('aerobic zone') || text.includes('zone 3')) {
+      setSmartHomeState((prev) => ({
+        ...prev,
+        currentBpm: 145,
+        targetZone: 'Aerobic',
+        heartRateHistory: generate15MinHeartRateHistory(145),
+      }));
+      resultingAction = 'Tuned heart rate target to Zone 3: Aerobic (145 BPM, 70-80% Max HR)';
+      category = 'device';
+      showToast('Alexa: "Shifted target to Aerobic Zone (145 BPM)"', 'success');
+    } else if (text.includes('music') || text.includes('soundtrack') || text.includes('mp3') || text.includes('audio track')) {
+      resultingAction = 'Synced workout MP3 audio soundtrack with live exercise stream';
+      category = 'device';
+      showToast('Alexa: "Synced workout MP3 audio soundtrack"', 'success');
+    } else if (text.includes('calorie goal') || text.includes('biometric goal') || text.includes('heart rate goal') || text.includes('target threshold') || text.includes('biometric target')) {
+      setActiveTab('dashboard');
+      resultingAction = 'Opened Biometric Goals & Heart Rate Thresholds on Fire TV Dashboard';
+      category = 'navigation';
+      showToast('Alexa: "Displaying your Biometric Goals & Thresholds"', 'info');
+    } else if (text.includes('video') || text.includes('split studio') || text.includes('backdrop')) {
+      resultingAction = 'Toggled 4K workout video demonstration display on Fire TV';
+      category = 'device';
+      showToast('Alexa: "Toggled workout video presentation on Fire TV"', 'success');
+    } else if (text.includes('update channel') || text.includes('update chanel') || text.includes('sync channel') || text.includes('refresh channel')) {
+      setActiveTab('iptv');
+      setOpenIptvAddModal(false);
+      resultingAction = 'Triggered instant live channel stream update and HLS re-synchronization';
+      category = 'device';
+      showToast('Alexa: "Updating channels and re-syncing live IPTV streams"', 'success');
+    } else if (text.includes('add m3u') || text.includes('add mp3u') || text.includes('add playlist') || text.includes('import m3u')) {
+      setActiveTab('iptv');
+      setOpenIptvAddModal(true);
+      resultingAction = 'Opened Add M3U IPTV Playlist modal ready to import https://iptv-org.github.io/iptv/index.m3u';
+      category = 'navigation';
+      showToast('Alexa: "Opening Add M3U Playlist modal"', 'info');
+    } else if (text.includes('iptv') || text.includes('live tv') || text.includes('m3u') || text.includes('channels') || text.includes('television')) {
+      setActiveTab('iptv');
+      setOpenIptvAddModal(false);
+      resultingAction = 'Opened Live IPTV Channel Guide with iptv-org M3U playlist integration';
+      category = 'navigation';
+      showToast('Alexa: "Opening Live IPTV Channel Guide (iptv-org)"', 'info');
+    } else if (text.includes('red bull') || text.includes('redbull')) {
+      setActiveTab('iptv');
+      resultingAction = 'Tuned to Red Bull TV live sports stream via HLS';
+      category = 'device';
+      showToast('Alexa: "Tuning to Red Bull TV Live"', 'success');
     } else if (text.includes('yoga') || text.includes('stretch') || text.includes('zen')) {
       const yoga = workouts.find((w) => w.category === 'yoga') || workouts[0];
       setActiveWorkout(yoga);
@@ -403,7 +550,14 @@ export default function App() {
         onToggleRemote={() => setShowRemote(!showRemote)}
         onOpenProposal={() => setShowProposalModal(true)}
         onOpenVoiceHistory={() => setShowVoiceHistoryModal(true)}
-        onOpenReadme={() => setShowReadmeModal(true)}
+        voiceLang={voiceLanguage}
+        onVoiceLangChange={(newLang) => handleVoiceLanguageChange(newLang, true)}
+        onTuneZeeCinema={() => {
+          setSelectedIptvChannelId('chan-zee-cinema-hd');
+          setOpenIptvAddModal(false);
+          setActiveTab('iptv');
+          showToast('Tuning to Zee Cinema HD live broadcast (ZEE5)', 'success');
+        }}
       />
 
       {/* Main Content Area */}
@@ -445,7 +599,49 @@ export default function App() {
             onSaveNewScene={handleSaveNewScene}
             onDeleteCustomScene={handleDeleteCustomScene}
             onOpenVoiceHistory={() => setShowVoiceHistoryModal(true)}
+            onOpenIptv={() => {
+              setOpenIptvAddModal(false);
+              setActiveTab('iptv');
+            }}
+            onLaunchIptvChannel={(c) => {
+              setSelectedIptvChannelId(c.id);
+              setOpenIptvAddModal(false);
+              setActiveTab('iptv');
+            }}
+            onAddM3u={() => {
+              setActiveTab('iptv');
+              setOpenIptvAddModal(true);
+            }}
+            voiceLang={voiceLanguage}
+            onVoiceLangChange={(l) => handleVoiceLanguageChange(l, true)}
+            onTuneZeeCinema={() => {
+              setSelectedIptvChannelId('chan-zee-cinema-hd');
+              setOpenIptvAddModal(false);
+              setActiveTab('iptv');
+              showToast('Tuning to Zee Cinema HD live broadcast (ZEE5)', 'success');
+            }}
           />
+        )}
+
+        {/* Live IPTV Channel Guide & M3U Playlist Hub */}
+        {activeTab === 'iptv' && (
+          <div className="pb-16">
+            <IptvChannelsHub
+              initialAddModalOpen={openIptvAddModal}
+              initialSelectedChannelId={selectedIptvChannelId}
+              voiceLang={voiceLanguage}
+              onVoiceLangChange={(l) => handleVoiceLanguageChange(l, true)}
+              onSelectChannelForWorkout={(channel) => {
+                const hiitWorkout = workouts[0];
+                setActiveWorkout({
+                  ...hiitWorkout,
+                  title: `${hiitWorkout.title} (Live TV: ${channel.name})`,
+                  videoUrl: channel.streamUrl,
+                });
+                showToast(`Linked live IPTV channel "${channel.name}" to workout video stream!`, 'success');
+              }}
+            />
+          </div>
         )}
 
         {activeTab === 'workouts' && (
@@ -561,6 +757,8 @@ export default function App() {
         isPlaying={!!activeWorkout}
         onVoiceCommand={handleVoiceCommand}
         onOpenVoiceHistory={() => setShowVoiceHistoryModal(true)}
+        voiceLang={voiceLanguage}
+        onVoiceLangChange={(newLang) => handleVoiceLanguageChange(newLang, true)}
       />
 
       {/* Alexa Voice Command History Modal */}
@@ -576,13 +774,6 @@ export default function App() {
       <GrantPitchModal
         isOpen={showProposalModal}
         onClose={() => setShowProposalModal(false)}
-      />
-
-      {/* Interactive Documentation & README Modal */}
-      <ReadmeModal
-        isOpen={showReadmeModal}
-        onClose={() => setShowReadmeModal(false)}
-        onLaunchWorkout={() => setActiveWorkout(workouts[0])}
       />
     </div>
   );

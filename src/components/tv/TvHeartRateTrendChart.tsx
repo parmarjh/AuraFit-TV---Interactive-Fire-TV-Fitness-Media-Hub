@@ -389,6 +389,8 @@ export const TvHeartRateTrendChart: React.FC<TvHeartRateTrendChartProps> = ({
         return 'text-orange-400 bg-orange-950/80 border-orange-800';
       case 'Aerobic':
         return 'text-amber-400 bg-amber-950/80 border-amber-800';
+      case 'Fat Burn':
+        return 'text-teal-400 bg-teal-950/80 border-teal-800';
       default:
         return 'text-emerald-400 bg-emerald-950/80 border-emerald-800';
     }

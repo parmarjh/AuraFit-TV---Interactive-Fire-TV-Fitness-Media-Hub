@@ -179,6 +179,7 @@ export const VoiceHistoryModal: React.FC<VoiceHistoryModalProps> = ({
             {[
               'Alexa, set workout mode',
               'Alexa, activate yoga mode',
+              'Alexa, play workout mp3',
               'Alexa, set fan to level 3',
               'Alexa, start 25-minute HIIT workout',
               'Alexa, optimal workout climate',

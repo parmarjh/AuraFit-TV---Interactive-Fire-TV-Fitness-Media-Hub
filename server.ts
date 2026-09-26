@@ -121,6 +121,95 @@ app.post('/api/gemini/optimize-automation', async (req, res) => {
   }
 });
 
+// IPTV M3U Playlist Proxy & Parser Endpoint
+app.get('/api/iptv/playlist', async (req, res) => {
+  try {
+    const targetUrl = (req.query.url as string) || 'https://iptv-org.github.io/iptv/index.m3u';
+    const limit = Math.min(1000, parseInt(req.query.limit as string) || 300);
+    const category = (req.query.category as string) || '';
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+
+    const response = await fetch(targetUrl, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'AuraFit-FireTV-IPTV/1.0',
+        'Accept': '*/*',
+      },
+    });
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: `Remote playlist returned HTTP ${response.status}: ${response.statusText}`,
+      });
+    }
+
+    const m3uText = await response.text();
+    const lines = m3uText.split(/\r?\n/);
+    const channels: any[] = [];
+    let currentChannel: any = null;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+
+      if (line.startsWith('#EXTINF:')) {
+        const extinf = line.substring(8);
+        const tvgIdMatch = extinf.match(/tvg-id="([^"]*)"/i);
+        const tvgNameMatch = extinf.match(/tvg-name="([^"]*)"/i);
+        const tvgLogoMatch = extinf.match(/tvg-logo="([^"]*)"/i);
+        const groupMatch = extinf.match(/group-title="([^"]*)"/i);
+
+        const lastComma = extinf.lastIndexOf(',');
+        let channelName = lastComma !== -1 ? extinf.substring(lastComma + 1).trim() : '';
+        if (!channelName && tvgNameMatch) {
+          channelName = tvgNameMatch[1];
+        }
+
+        currentChannel = {
+          id: `chan-${channels.length + 1}`,
+          name: channelName || `Channel ${channels.length + 1}`,
+          logo: tvgLogoMatch ? tvgLogoMatch[1] : undefined,
+          group: groupMatch ? groupMatch[1] : 'General',
+          tvgId: tvgIdMatch ? tvgIdMatch[1] : undefined,
+        };
+      } else if (!line.startsWith('#') && currentChannel) {
+        if (line.startsWith('http://') || line.startsWith('https://')) {
+          const matchCategory =
+            !category ||
+            category.toLowerCase() === 'all' ||
+            (currentChannel.group && currentChannel.group.toLowerCase().includes(category.toLowerCase()));
+
+          if (matchCategory) {
+            channels.push({
+              ...currentChannel,
+              streamUrl: line,
+            });
+
+            if (channels.length >= limit) {
+              break;
+            }
+          }
+        }
+        currentChannel = null;
+      }
+    }
+
+    res.json({
+      url: targetUrl,
+      totalChannels: channels.length,
+      channels,
+    });
+  } catch (error: any) {
+    console.error('IPTV Playlist Fetch Error:', error);
+    res.status(500).json({
+      error: error?.message || 'Failed to fetch M3U playlist',
+    });
+  }
+});
+
 // Full-Stack Dev & Prod static serving
 async function startServer() {
   const isProd = process.env.NODE_ENV === 'production';

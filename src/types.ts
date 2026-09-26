@@ -31,6 +31,9 @@ export interface Workout {
   steps: ExerciseStep[];
   rating: number;
   completedCount: number;
+  videoUrl?: string;
+  audioUrl?: string;
+  audioTitle?: string;
 }
 
 export interface ScheduledWorkout {
@@ -42,12 +45,48 @@ export interface ScheduledWorkout {
   type: 'Morning' | 'Midday' | 'Evening' | 'Night';
 }
 
+export type VoiceLanguage = 'en' | 'hi' | 'gu';
+
+export interface IptvChannel {
+  id: string;
+  name: string;
+  streamUrl: string;
+  externalUrl?: string;
+  logo?: string;
+  group?: string; // e.g. "Sports", "Fitness", "Music", "News", "Relax"
+  country?: string;
+  language?: string;
+  tvgId?: string;
+  resolution?: string;
+  isFavorite?: boolean;
+}
+
+export interface IptvPlaylist {
+  id: string;
+  name: string;
+  url: string;
+  totalChannels: number;
+  lastUpdated: string;
+  description?: string;
+  channels: IptvChannel[];
+}
+
 export interface HeartRatePoint {
   minuteOffset: number; // -15 to 0 (minutes before current)
   label: string; // e.g. "-15m", "-10m", "-5m", "Now"
   bpm: number;
-  zone: 'Warmup' | 'Aerobic' | 'Threshold' | 'Peak';
+  zone: 'Warmup' | 'Warm-up' | 'Fat Burn' | 'Aerobic' | 'Threshold' | 'Peak';
   timestamp: string;
+}
+
+export interface BiometricGoals {
+  targetMinBpm: number;
+  targetMaxBpm: number;
+  dailyCalorieGoal: number;
+  activeZoneMinutesGoal: number;
+  targetZonePreset: 'Fat Burn' | 'Aerobic' | 'Threshold' | 'Peak' | 'Custom';
+  autoFanCoolingTriggerBpm: number;
+  lastSaved?: string;
 }
 
 export interface SmartHomeState {
@@ -59,7 +98,7 @@ export interface SmartHomeState {
   pairedHeartRateDevice: string | null;
   heartRateConnected: boolean;
   currentBpm: number;
-  targetZone: 'Warmup' | 'Aerobic' | 'Threshold' | 'Peak';
+  targetZone: 'Warmup' | 'Warm-up' | 'Fat Burn' | 'Aerobic' | 'Threshold' | 'Peak' | string;
   caloriesBurned: number;
   heartRateHistory?: HeartRatePoint[];
 }

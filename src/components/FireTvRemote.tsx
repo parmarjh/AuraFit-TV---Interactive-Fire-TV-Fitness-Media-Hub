@@ -16,8 +16,17 @@ import {
   Minimize2,
   Maximize2,
   Sparkles,
+  Languages,
 } from 'lucide-react';
 import { playRemoteClick, playRemoteSelect } from '../utils/soundEffects';
+import { VoiceLanguage } from '../types';
+import {
+  VOICE_LANGUAGES,
+  getStoredVoiceLanguage,
+  setStoredVoiceLanguage,
+  speakVoiceResponse,
+  tryVoiceSample,
+} from '../utils/voiceAssistant';
 
 interface FireTvRemoteProps {
   isOpen: boolean;
@@ -31,6 +40,8 @@ interface FireTvRemoteProps {
   isPlaying?: boolean;
   onVoiceCommand: (query: string) => void;
   onOpenVoiceHistory?: () => void;
+  voiceLang?: VoiceLanguage;
+  onVoiceLangChange?: (lang: VoiceLanguage) => void;
 }
 
 export const FireTvRemote: React.FC<FireTvRemoteProps> = ({
@@ -45,11 +56,42 @@ export const FireTvRemote: React.FC<FireTvRemoteProps> = ({
   isPlaying = false,
   onVoiceCommand,
   onOpenVoiceHistory,
+  voiceLang = 'en',
+  onVoiceLangChange,
 }) => {
+  const [currentVoiceLang, setCurrentVoiceLang] = useState<VoiceLanguage>(() => {
+    return voiceLang || getStoredVoiceLanguage();
+  });
   const [isListening, setIsListening] = useState(false);
   const [voiceQuery, setVoiceQuery] = useState('');
   const [isMinimized, setIsMinimized] = useState(false);
   const [lastAction, setLastAction] = useState<string>('');
+
+  useEffect(() => {
+    if (voiceLang && voiceLang !== currentVoiceLang) {
+      setCurrentVoiceLang(voiceLang);
+    }
+  }, [voiceLang]);
+
+  const handleLanguageChange = (newLang: VoiceLanguage) => {
+    playRemoteSelect();
+    setCurrentVoiceLang(newLang);
+    setStoredVoiceLanguage(newLang);
+    if (onVoiceLangChange) {
+      onVoiceLangChange(newLang);
+    }
+
+    const cfg = VOICE_LANGUAGES[newLang];
+    const greeting =
+      newLang === 'gu'
+        ? 'અવાજ ગુજરાતીમાં સેટ કર્યો છે'
+        : newLang === 'hi'
+        ? 'आवाज हिन्दी में सेट कर दी गई है'
+        : 'Voice set to English';
+    speakVoiceResponse(greeting, newLang);
+    setVoiceQuery(`Language: ${cfg.nativeName}`);
+    setTimeout(() => setVoiceQuery(''), 2500);
+  };
 
   // Keyboard navigation listener (Arrow keys, Enter, Backspace, Space, Esc)
   useEffect(() => {
@@ -107,7 +149,8 @@ export const FireTvRemote: React.FC<FireTvRemoteProps> = ({
   const handleMicClick = () => {
     playRemoteClick();
     setIsListening(true);
-    setVoiceQuery('Listening for Alexa command...');
+    const langConfig = VOICE_LANGUAGES[currentVoiceLang] || VOICE_LANGUAGES.en;
+    setVoiceQuery(langConfig.listeningPrompt);
 
     // If browser supports webkitSpeechRecognition
     const SpeechRecognition =
@@ -116,7 +159,7 @@ export const FireTvRemote: React.FC<FireTvRemoteProps> = ({
     if (SpeechRecognition) {
       try {
         const recognition = new SpeechRecognition();
-        recognition.lang = 'en-US';
+        recognition.lang = langConfig.recognitionCode;
         recognition.interimResults = false;
         recognition.maxAlternatives = 1;
 
@@ -142,13 +185,8 @@ export const FireTvRemote: React.FC<FireTvRemoteProps> = ({
   };
 
   const simulateRandomVoiceCommand = () => {
-    const samples = [
-      'Start 25-minute HIIT workout',
-      'Turn living room workout fan to level 3',
-      'Show my daily schedule',
-      'Dim ambient lights to cardio crimson',
-      'What is my current heart rate?',
-    ];
+    const langConfig = VOICE_LANGUAGES[currentVoiceLang] || VOICE_LANGUAGES.en;
+    const samples = langConfig.samplePrompts;
     const picked = samples[Math.floor(Math.random() * samples.length)];
 
     setTimeout(() => {
@@ -159,6 +197,8 @@ export const FireTvRemote: React.FC<FireTvRemoteProps> = ({
   };
 
   if (!isOpen) return null;
+
+  const currentLangConfig = VOICE_LANGUAGES[currentVoiceLang] || VOICE_LANGUAGES.en;
 
   return (
     <div
@@ -207,6 +247,60 @@ export const FireTvRemote: React.FC<FireTvRemoteProps> = ({
           </div>
         ) : (
           <div className="p-4 flex flex-col items-center select-none">
+            {/* Multilingual Voice Switcher (English, हिन्दी, ગુજરાતી) */}
+            <div className="w-full flex items-center justify-between mb-1.5 px-1">
+              <div className="flex items-center gap-1 text-[10px] text-neutral-400 font-mono">
+                <Languages className="w-3 h-3 text-cyan-400" />
+                <span>Voice:</span>
+              </div>
+              <div className="flex items-center gap-1 bg-neutral-950 p-0.5 rounded-lg border border-neutral-800 text-[10px]">
+                {(['en', 'hi', 'gu'] as VoiceLanguage[]).map((lang) => {
+                  const cfg = VOICE_LANGUAGES[lang];
+                  const isSelected = currentVoiceLang === lang;
+                  return (
+                    <button
+                      key={lang}
+                      onClick={() => handleLanguageChange(lang)}
+                      className={`px-2 py-0.5 rounded font-bold transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-cyan-500 text-neutral-950 shadow-sm'
+                          : 'text-neutral-400 hover:text-white'
+                      }`}
+                      title={`Switch voice language to ${cfg.name}`}
+                    >
+                      {cfg.badge}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Quick 1-Click "Try Voice" Audio Preview Bar */}
+            <div className="w-full bg-neutral-950/70 border border-neutral-800/80 rounded-xl p-1.5 mb-2.5 flex items-center justify-between text-[10px]">
+              <span className="text-[9px] text-cyan-400 font-mono font-semibold">Try Voice:</span>
+              <div className="flex items-center gap-1">
+                {(['gu', 'hi', 'en'] as VoiceLanguage[]).map((l) => (
+                  <button
+                    key={l}
+                    onClick={() => {
+                      playRemoteSelect();
+                      handleLanguageChange(l);
+                      const res = tryVoiceSample(l);
+                      setVoiceQuery(`Spoken: "${res.phrase.slice(0, 32)}..."`);
+                    }}
+                    className={`px-1.5 py-0.5 rounded text-[9px] font-bold cursor-pointer transition-all border ${
+                      currentVoiceLang === l
+                        ? 'bg-amber-500/20 border-amber-500 text-amber-300'
+                        : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white'
+                    }`}
+                    title={`Click to hear speech in ${VOICE_LANGUAGES[l].name}`}
+                  >
+                    🔊 {l === 'gu' ? 'ગુજરાતી' : l === 'hi' ? 'हिन्दी' : 'English'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Alexa Voice Microphone Button */}
             <div className="w-full flex flex-col items-center mb-3">
               <button
@@ -216,14 +310,14 @@ export const FireTvRemote: React.FC<FireTvRemoteProps> = ({
                     ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/50 scale-105 animate-pulse'
                     : 'bg-neutral-800 hover:bg-neutral-700 text-cyan-400 border border-cyan-500/40 hover:border-cyan-400'
                 }`}
-                title="Press & Speak to Alexa"
+                title={`Press & Speak to ${currentLangConfig.alexaTitle}`}
               >
                 <Mic className="w-5 h-5" />
               </button>
               <div className="flex items-center gap-2 mt-1">
                 <span className="text-[11px] text-neutral-400 flex items-center gap-1">
                   <Sparkles className="w-3 h-3 text-cyan-400" />
-                  Alexa Voice Assistant
+                  {currentLangConfig.alexaTitle}
                 </span>
                 {onOpenVoiceHistory && (
                   <button
@@ -233,7 +327,7 @@ export const FireTvRemote: React.FC<FireTvRemoteProps> = ({
                     }}
                     className="text-[10px] text-amber-400 hover:text-amber-300 font-medium underline cursor-pointer"
                   >
-                    History (10)
+                    History
                   </button>
                 )}
               </div>
@@ -242,6 +336,44 @@ export const FireTvRemote: React.FC<FireTvRemoteProps> = ({
                   {voiceQuery}
                 </div>
               )}
+
+              {/* Direct Zee Cinema HD Quick Trigger */}
+              <div className="w-full mt-2">
+                <button
+                  onClick={() => {
+                    playRemoteSelect();
+                    const prompt = currentVoiceLang === 'gu'
+                      ? 'ઝી સિનેમા એચડી ચલાવો'
+                      : currentVoiceLang === 'hi'
+                      ? 'ज़ी सिनेमा एचडी चलाओ'
+                      : 'Play Zee Cinema HD';
+                    setVoiceQuery(`"${prompt}"`);
+                    onVoiceCommand(prompt);
+                  }}
+                  className="w-full py-1 px-2 rounded-xl bg-purple-950/70 hover:bg-purple-900 border border-purple-800 text-[10px] text-purple-200 hover:text-white flex items-center justify-center gap-1.5 cursor-pointer transition-colors shadow-sm"
+                  title="Tune to Zee Cinema HD Live (ZEE5)"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-ping" />
+                  <span className="font-semibold">📺 Tune Zee Cinema HD (ZEE5)</span>
+                </button>
+              </div>
+
+              {/* Quick Sample Voice Chips */}
+              <div className="w-full flex items-center gap-1 overflow-x-auto py-1 mt-1.5 scrollbar-none">
+                {currentLangConfig.samplePrompts.slice(0, 3).map((prompt, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      playRemoteSelect();
+                      setVoiceQuery(`"${prompt}"`);
+                      onVoiceCommand(prompt);
+                    }}
+                    className="text-[9px] font-mono px-2 py-0.5 rounded-lg bg-neutral-950/80 hover:bg-neutral-800 text-neutral-300 hover:text-cyan-300 border border-neutral-800 whitespace-nowrap cursor-pointer transition-colors"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Circular D-Pad */}

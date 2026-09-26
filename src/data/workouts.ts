@@ -57,6 +57,9 @@ export const WORKOUT_CATALOG: Workout[] = [
     ],
     rating: 4.9,
     completedCount: 14200,
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    audioUrl: 'https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverending_Story.mp3',
+    audioTitle: 'Inferno Velocity (138 BPM HIIT Mix)',
   },
   {
     id: 'strength-hypertrophy-35',
@@ -111,6 +114,9 @@ export const WORKOUT_CATALOG: Workout[] = [
     ],
     rating: 4.95,
     completedCount: 9840,
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
+    audioUrl: 'https://commondatastorage.googleapis.com/codeskulptor-assets/Epoq-Lepidoptera.mp3',
+    audioTitle: 'Hyperdrive Power Circuit (144 BPM Breakbeat)',
   },
   {
     id: 'morning-mobility-15',
@@ -161,6 +167,9 @@ export const WORKOUT_CATALOG: Workout[] = [
     ],
     rating: 4.88,
     completedCount: 22100,
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+    audioUrl: 'https://commondatastorage.googleapis.com/codeskulptor-demos/riceracer_assets/music/race1.ogg',
+    audioTitle: 'Serenity Breath & Recovery (72 BPM Ambient)',
   },
   {
     id: 'evening-restorative-yoga-20',
@@ -204,6 +213,9 @@ export const WORKOUT_CATALOG: Workout[] = [
     ],
     rating: 4.97,
     completedCount: 18700,
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyBlazes.mp4',
+    audioUrl: 'https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Sevish_-__nbsp_.mp3',
+    audioTitle: 'Neon Horizon Cardio Flow (126 BPM Synthwave)',
   },
   {
     id: 'cardio-kickbox-30',
@@ -247,6 +259,9 @@ export const WORKOUT_CATALOG: Workout[] = [
     ],
     rating: 4.92,
     completedCount: 11500,
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+    audioUrl: 'https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverending_Story.mp3',
+    audioTitle: 'Inferno Velocity (138 BPM HIIT Mix)',
   },
   {
     id: 'quick-posture-reset-10',
@@ -290,5 +305,8 @@ export const WORKOUT_CATALOG: Workout[] = [
     ],
     rating: 4.85,
     completedCount: 31400,
+    videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+    audioUrl: 'https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Sevish_-__nbsp_.mp3',
+    audioTitle: 'Neon Horizon Cardio Flow (126 BPM Synthwave)',
   },
 ];

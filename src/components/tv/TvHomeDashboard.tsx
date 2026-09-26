@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { Workout, ScheduledWorkout, SmartHomeState, WorkoutCategory, SmartScene } from '../../types';
+import { Workout, ScheduledWorkout, SmartHomeState, WorkoutCategory, SmartScene, VoiceLanguage } from '../../types';
 import { TvWorkoutCard } from './TvWorkoutCard';
 import { TvSmartHomeWidget } from './TvSmartHomeWidget';
 import { TvScheduleWidget } from './TvScheduleWidget';
 import { SmartSceneController } from '../smarthome/SmartSceneController';
 import { TvHeartRateTrendChart } from './TvHeartRateTrendChart';
+import { HeartRateZoneWidget } from './HeartRateZoneWidget';
+import { BiometricGoals } from '../biometrics/BiometricGoals';
+import { TvIptvShelf } from './TvIptvShelf';
+import { IptvChannel } from '../../types';
 import {
   Play,
   Calendar,
@@ -17,6 +21,7 @@ import {
   Award,
   Zap,
   Mic,
+  Languages,
 } from 'lucide-react';
 import { playRemoteClick, playRemoteSelect } from '../../utils/soundEffects';
 
@@ -39,6 +44,12 @@ interface TvHomeDashboardProps {
   onSaveNewScene: (scene: SmartScene) => void;
   onDeleteCustomScene: (sceneId: string) => void;
   onOpenVoiceHistory?: () => void;
+  onOpenIptv?: () => void;
+  onLaunchIptvChannel?: (channel: IptvChannel) => void;
+  onAddM3u?: () => void;
+  voiceLang?: VoiceLanguage;
+  onVoiceLangChange?: (lang: VoiceLanguage) => void;
+  onTuneZeeCinema?: () => void;
 }
 
 export const TvHomeDashboard: React.FC<TvHomeDashboardProps> = ({
@@ -60,6 +71,12 @@ export const TvHomeDashboard: React.FC<TvHomeDashboardProps> = ({
   onSaveNewScene,
   onDeleteCustomScene,
   onOpenVoiceHistory,
+  onOpenIptv,
+  onLaunchIptvChannel,
+  onAddM3u,
+  voiceLang = 'en',
+  onVoiceLangChange,
+  onTuneZeeCinema,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<WorkoutCategory>('all');
   const heroWorkout = workouts[0]; // Featured TV Workout
@@ -235,6 +252,18 @@ export const TvHomeDashboard: React.FC<TvHomeDashboardProps> = ({
         onUpdateSmartHome={onUpdateSmartHome}
       />
 
+      {/* Heart Rate Intensity Zone Breakdown Widget */}
+      <HeartRateZoneWidget
+        smartHomeState={smartHomeState}
+        onUpdateSmartHome={onUpdateSmartHome}
+      />
+
+      {/* Target Biometric Goals & Heart Rate Thresholds */}
+      <BiometricGoals
+        smartHomeState={smartHomeState}
+        onUpdateSmartHome={onUpdateSmartHome}
+      />
+
       {/* Two Real-Time Companion Widgets on Fire TV: Smart Home & Today's Schedule */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <TvSmartHomeWidget
@@ -250,6 +279,107 @@ export const TvHomeDashboard: React.FC<TvHomeDashboardProps> = ({
           onAddSchedule={onAddSchedule}
         />
       </div>
+
+      {/* Multilingual Voice Assistant & Zee Cinema HD Interactive Try Bar */}
+      <div className="bg-gradient-to-r from-purple-950/60 via-neutral-900 to-neutral-950 border border-purple-800/60 rounded-3xl p-5 shadow-xl relative overflow-hidden">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-purple-900/60 border border-purple-600/60 flex items-center justify-center text-purple-300 shadow-md shrink-0">
+              <Languages className="w-5 h-5 text-cyan-400" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-base font-bold font-display text-white">
+                  Voice Change & Audio Assistant
+                </h3>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-950 border border-purple-700 text-purple-300 font-bold">
+                  ZEE5 Live TV
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-neutral-900 border border-neutral-700 text-cyan-300">
+                  Active Voice: {voiceLang === 'gu' ? 'ગુજરાતી (Gujarati)' : voiceLang === 'hi' ? 'हिन्दी (Hindi)' : 'English'}
+                </span>
+              </div>
+              <p className="text-xs text-neutral-400 mt-0.5">
+                Click any language to try native speech synthesis voice & switch Zee Cinema HD broadcast audio
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap self-start md:self-center">
+            {/* Try Gujarati Button */}
+            <button
+              onClick={() => {
+                playRemoteSelect();
+                if (onVoiceLangChange) onVoiceLangChange('gu');
+              }}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 border shadow-sm ${
+                voiceLang === 'gu'
+                  ? 'bg-cyan-500 text-neutral-950 border-cyan-400 shadow-cyan-500/20 scale-[1.02]'
+                  : 'bg-neutral-900 border-neutral-700 text-neutral-200 hover:text-white hover:bg-neutral-800'
+              }`}
+              title="Try Gujarati Voice (અવાજ ગુજરાતીમાં સાંભળો)"
+            >
+              <span>🇮🇳</span>
+              <span>Try ગુજરાતી</span>
+            </button>
+
+            {/* Try Hindi Button */}
+            <button
+              onClick={() => {
+                playRemoteSelect();
+                if (onVoiceLangChange) onVoiceLangChange('hi');
+              }}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 border shadow-sm ${
+                voiceLang === 'hi'
+                  ? 'bg-cyan-500 text-neutral-950 border-cyan-400 shadow-cyan-500/20 scale-[1.02]'
+                  : 'bg-neutral-900 border-neutral-700 text-neutral-200 hover:text-white hover:bg-neutral-800'
+              }`}
+              title="Try Hindi Voice (आवाज हिन्दी में सुनें)"
+            >
+              <span>🇮🇳</span>
+              <span>Try हिन्दी</span>
+            </button>
+
+            {/* Try English Button */}
+            <button
+              onClick={() => {
+                playRemoteSelect();
+                if (onVoiceLangChange) onVoiceLangChange('en');
+              }}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 border shadow-sm ${
+                voiceLang === 'en'
+                  ? 'bg-cyan-500 text-neutral-950 border-cyan-400 shadow-cyan-500/20 scale-[1.02]'
+                  : 'bg-neutral-900 border-neutral-700 text-neutral-200 hover:text-white hover:bg-neutral-800'
+              }`}
+              title="Try English Voice"
+            >
+              <span>🌐</span>
+              <span>Try English</span>
+            </button>
+
+            {/* Watch Zee Cinema HD */}
+            <button
+              onClick={() => {
+                playRemoteSelect();
+                if (onTuneZeeCinema) onTuneZeeCinema();
+                else if (onOpenIptv) onOpenIptv();
+              }}
+              className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-md shadow-purple-600/30"
+              title="Watch Zee Cinema HD Live (ZEE5)"
+            >
+              <Tv className="w-3.5 h-3.5" />
+              <span>Watch Zee Cinema HD</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Live IPTV & M3U Channels Shelf */}
+      <TvIptvShelf
+        onOpenIptvHub={onOpenIptv || (() => {})}
+        onLaunchChannel={onLaunchIptvChannel || (() => {})}
+        onAddM3u={onAddM3u}
+      />
 
       {/* Recommended For You Shelf */}
       <div className="space-y-4">
