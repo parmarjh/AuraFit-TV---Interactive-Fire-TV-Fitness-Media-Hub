@@ -85,14 +85,14 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
           onClick={() => handleTabClick('iptv')}
           className={`transition-colors relative py-1 focus:outline-none cursor-pointer flex items-center gap-1.5 ${
             activeTab === 'iptv'
-              ? 'text-white font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-amber-500'
+              ? 'text-white font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-purple-500'
               : 'hover:text-neutral-200'
           }`}
         >
-          <Radio className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
-          <span>Live IPTV</span>
-          <span className="px-1.5 py-0.2 rounded bg-rose-950 border border-rose-800 text-rose-300 text-[9px] font-mono font-bold">
-            M3U
+          <Radio className="w-3.5 h-3.5 text-purple-400 animate-pulse" />
+          <span>ZEE5 & Live TV</span>
+          <span className="px-1.5 py-0.2 rounded bg-purple-950 border border-purple-800 text-purple-300 text-[9px] font-mono font-bold">
+            28+ CH
           </span>
         </button>
 
@@ -178,11 +178,11 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
               playRemoteClick();
               onTuneZeeCinema();
             }}
-            className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-purple-950/80 hover:bg-purple-900 border border-purple-700/80 text-purple-200 text-xs font-semibold cursor-pointer transition-colors shadow-sm"
-            title="Tune to Zee Cinema HD live broadcast on ZEE5"
+            className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 border border-purple-400/40 text-white text-xs font-bold cursor-pointer transition-colors shadow-sm"
+            title="Tune to ZEE5 live channels broadcast"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-ping" />
-            <span>Zee Cinema HD</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+            <span>ZEE5 Live TV</span>
           </button>
         )}
 

@@ -47,18 +47,38 @@ export interface ScheduledWorkout {
 
 export type VoiceLanguage = 'en' | 'hi' | 'gu';
 
+export interface ZeeShow {
+  id: string;
+  title: string;
+  channelName: string;
+  genre: string;
+  timeSlot?: string;
+  description: string;
+  thumbnail: string;
+  streamUrl?: string;
+  zee5Url?: string;
+  language: string;
+  isPopular?: boolean;
+}
+
 export interface IptvChannel {
   id: string;
   name: string;
   streamUrl: string;
+  backupStreamUrls?: string[];
   externalUrl?: string;
   logo?: string;
-  group?: string; // e.g. "Sports", "Fitness", "Music", "News", "Relax"
+  group?: string; // e.g. "ZEE Entertainment", "ZEE Movies", "ZEE News", "ZEE Regional", "Sports", "Fitness"
   country?: string;
   language?: string;
   tvgId?: string;
   resolution?: string;
   isFavorite?: boolean;
+  isZeeNetwork?: boolean;
+  currentShow?: string;
+  upcomingShow?: string;
+  shows?: ZeeShow[];
+  description?: string;
 }
 
 export interface IptvPlaylist {

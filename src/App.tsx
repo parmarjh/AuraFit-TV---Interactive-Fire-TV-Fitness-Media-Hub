@@ -345,6 +345,26 @@ export default function App() {
       resultingAction = 'Opened Alexa Voice Command History modal displaying the last 10 transcribed commands';
       category = 'navigation';
       showToast('Alexa: "Opening Alexa Voice Command History modal"', 'info');
+    } else if (text.includes('zee5') || text.includes('zee tv') || text.includes('zee cinema') || text.includes('zee news') || text.includes('24 kalak') || text.includes('zee')) {
+      setActiveTab('iptv');
+      if (text.includes('kalak')) {
+        setSelectedIptvChannelId('chan-zee-24-kalak');
+        resultingAction = 'Tuned Fire TV to Zee 24 Kalak Gujarati live news feed (ZEE5)';
+        showToast('Alexa: "Tuning to Zee 24 Kalak (ZEE5)"', 'success');
+      } else if (text.includes('news')) {
+        setSelectedIptvChannelId('chan-zee-news-hd');
+        resultingAction = 'Tuned Fire TV to Zee News HD 24x7 live stream (ZEE5)';
+        showToast('Alexa: "Tuning to Zee News HD (ZEE5)"', 'success');
+      } else if (text.includes('tv')) {
+        setSelectedIptvChannelId('chan-zee-tv-hd');
+        resultingAction = 'Tuned Fire TV to Zee TV HD flagship general entertainment (ZEE5)';
+        showToast('Alexa: "Tuning to Zee TV HD (ZEE5)"', 'success');
+      } else {
+        setSelectedIptvChannelId('chan-zee-cinema-hd');
+        resultingAction = 'Tuned Fire TV to Zee Cinema HD live Bollywood movie stream (ZEE5)';
+        showToast('Alexa: "Tuning to Zee Cinema HD on ZEE5"', 'success');
+      }
+      category = 'navigation';
     } else if (text.includes('workout mode') || text.includes('inferno mode')) {
       const workoutScene = smartScenes.find((s) => s.id === 'scene-workout-inferno');
       if (workoutScene) handleApplyScene(workoutScene);

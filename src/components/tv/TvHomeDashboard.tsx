@@ -357,7 +357,7 @@ export const TvHomeDashboard: React.FC<TvHomeDashboardProps> = ({
               <span>Try English</span>
             </button>
 
-            {/* Watch Zee Cinema HD */}
+            {/* Watch ZEE5 Live TV */}
             <button
               onClick={() => {
                 playRemoteSelect();
@@ -365,10 +365,10 @@ export const TvHomeDashboard: React.FC<TvHomeDashboardProps> = ({
                 else if (onOpenIptv) onOpenIptv();
               }}
               className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-md shadow-purple-600/30"
-              title="Watch Zee Cinema HD Live (ZEE5)"
+              title="Watch 28+ ZEE5 Live TV Channels & Shows"
             >
               <Tv className="w-3.5 h-3.5" />
-              <span>Watch Zee Cinema HD</span>
+              <span>Watch ZEE5 Live TV</span>
             </button>
           </div>
         </div>
